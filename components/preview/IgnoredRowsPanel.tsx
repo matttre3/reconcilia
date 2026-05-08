@@ -1,6 +1,8 @@
 "use client";
 
+import { TableRowTooltip } from "@/components/shared/TableRowTooltip";
 import { useState } from "react";
+import { TruncatedText } from "@/components/shared/TruncatedText";
 import type { IgnoredRow } from "@/types";
 
 type Props = {
@@ -36,18 +38,37 @@ export function IgnoredRowsPanel({ ignoredRows }: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {ignoredRows.map((row) => (
-                <tr key={row.originalRowIndex} className="hover:bg-gray-50">
+              {ignoredRows.map((row) => {
+                const rawPreview = Object.values(row.raw)
+                  .filter((v) => v !== null && v !== undefined && String(v).trim() !== "")
+                  .slice(0, 5)
+                  .join(" | ");
+
+                return (
+                <TableRowTooltip
+                  key={row.originalRowIndex}
+                  className="hover:bg-gray-50"
+                  content={
+                    <div className="grid gap-1">
+                      <div>
+                        <span className="font-semibold">Motivo:</span> {row.reason}
+                      </div>
+                      <div>
+                        <span className="font-semibold">Contenuto:</span> {rawPreview || "—"}
+                      </div>
+                    </div>
+                  }
+                >
                   <td className="px-3 py-1.5 font-mono text-gray-400">{row.originalRowIndex}</td>
                   <td className="px-3 py-1.5 text-gray-500">{row.reason}</td>
-                  <td className="px-3 py-1.5 text-gray-400 truncate max-w-[300px]">
-                    {Object.values(row.raw)
-                      .filter((v) => v !== null && v !== undefined && String(v).trim() !== "")
-                      .slice(0, 5)
-                      .join(" | ")}
+                  <td className="px-3 py-1.5 text-gray-400">
+                    <TruncatedText
+                      text={rawPreview}
+                      className="max-w-[300px]"
+                    />
                   </td>
-                </tr>
-              ))}
+                </TableRowTooltip>
+              )})}
             </tbody>
           </table>
         </div>

@@ -12,8 +12,10 @@ import { useState } from "react";
 import type { MatchResult } from "@/types";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { ConfidenceBar } from "@/components/shared/ConfidenceBar";
+import { TableRowTooltip } from "@/components/shared/TableRowTooltip";
+import { TruncatedText } from "@/components/shared/TruncatedText";
 import { Badge } from "@/components/ui/badge";
-import { centsToEuro } from "@/lib/reconcile/moneyUtils";
+import { centsToEuro, sumCents } from "@/lib/reconcile/moneyUtils";
 
 type Props = {
   matches: MatchResult[];
@@ -40,7 +42,10 @@ const columns: ColumnDef<MatchResult>[] = [
     header: "Danea",
     accessorFn: (row) => row.left.map((tx) => tx.description ?? tx.date).join(", "),
     cell: (info) => (
-      <span className="text-sm truncate max-w-[200px] block">{String(info.getValue())}</span>
+      <TruncatedText
+        text={String(info.getValue())}
+        className="max-w-[200px] text-sm"
+      />
     ),
   },
   {
@@ -54,7 +59,10 @@ const columns: ColumnDef<MatchResult>[] = [
     header: "Banca",
     accessorFn: (row) => row.right.map((tx) => tx.description ?? tx.date).join(", "),
     cell: (info) => (
-      <span className="text-sm truncate max-w-[200px] block">{String(info.getValue())}</span>
+      <TruncatedText
+        text={String(info.getValue())}
+        className="max-w-[200px] text-sm"
+      />
     ),
   },
   {
@@ -105,6 +113,10 @@ export function MatchResultsTable({ matches, onRowClick }: Props) {
     );
   }
 
+  const displayedMatches = table.getRowModel().rows.map((row) => row.original);
+  const totalLeftCents = sumCents(displayedMatches.map((match) => match.leftTotalCents));
+  const totalRightCents = sumCents(displayedMatches.map((match) => match.rightTotalCents));
+
   return (
     <div className="overflow-auto rounded-lg border border-gray-200 bg-white">
       <table className="w-full text-sm">
@@ -126,19 +138,50 @@ export function MatchResultsTable({ matches, onRowClick }: Props) {
         </thead>
         <tbody className="divide-y divide-gray-100">
           {table.getRowModel().rows.map((row) => (
-            <tr
+            <TableRowTooltip
               key={row.id}
               className="hover:bg-gray-50 cursor-pointer"
               onClick={() => onRowClick(row.original)}
+              content={
+                <div className="grid gap-1">
+                  <div>
+                    <span className="font-semibold">Danea:</span>{" "}
+                    {row.original.left.map((tx) => tx.description ?? tx.date).join(", ") || "—"}
+                  </div>
+                  <div>
+                    <span className="font-semibold">Banca:</span>{" "}
+                    {row.original.right.map((tx) => tx.description ?? tx.date).join(", ") || "—"}
+                  </div>
+                </div>
+              }
             >
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id} className="px-3 py-2">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
-            </tr>
+            </TableRowTooltip>
           ))}
         </tbody>
+        <tfoot className="border-t border-gray-200 bg-gray-50">
+          <tr>
+            <td className="px-3 py-2 text-sm font-semibold text-gray-700">
+              Saldo riconciliato
+            </td>
+            <td className="px-3 py-2 text-xs text-gray-500">
+              {displayedMatches.length} match
+            </td>
+            <td className="px-3 py-2">
+              <AmountBadge cents={totalLeftCents} className="font-semibold" />
+            </td>
+            <td className="px-3 py-2" />
+            <td className="px-3 py-2">
+              <AmountBadge cents={totalRightCents} className="font-semibold" />
+            </td>
+            <td className="px-3 py-2" />
+            <td className="px-3 py-2" />
+          </tr>
+        </tfoot>
       </table>
     </div>
   );

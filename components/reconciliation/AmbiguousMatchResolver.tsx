@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ConfidenceBar } from "@/components/shared/ConfidenceBar";
 import { AmountBadge } from "@/components/shared/AmountBadge";
+import { TruncatedText } from "@/components/shared/TruncatedText";
 import { centsToEuro } from "@/lib/reconcile/moneyUtils";
 import type { MatchResult } from "@/types";
 
@@ -23,7 +24,7 @@ export function AmbiguousMatchResolver({ match, onConfirm, onMarkUnmatched }: Pr
         <p className="text-xs font-semibold text-gray-500 mb-1">Movimento Danea da riconciliare</p>
         <div className="flex items-center gap-3">
           <span className="font-mono text-sm">{match.left[0]?.date}</span>
-          <span className="text-sm truncate">{match.left[0]?.description || "—"}</span>
+          <TruncatedText text={match.left[0]?.description} className="max-w-[260px] text-sm" />
           <AmountBadge cents={match.leftTotalCents} />
         </div>
       </div>
@@ -59,7 +60,7 @@ export function AmbiguousMatchResolver({ match, onConfirm, onMarkUnmatched }: Pr
               {alt.right.map((tx) => (
                 <div key={tx.id} className="flex items-center gap-2 text-xs">
                   <span className="font-mono text-gray-500">{tx.date}</span>
-                  <span className="truncate max-w-[200px]">{tx.description || "—"}</span>
+                  <TruncatedText text={tx.description} className="max-w-[200px]" />
                   <AmountBadge cents={tx.amountCents} showSign={false} />
                 </div>
               ))}

@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AmountBadge } from "@/components/shared/AmountBadge";
 import { ConfidenceBar } from "@/components/shared/ConfidenceBar";
+import { TableRowTooltip } from "@/components/shared/TableRowTooltip";
+import { TruncatedText } from "@/components/shared/TruncatedText";
 import type { MatchResult } from "@/types";
 import { centsToEuro } from "@/lib/reconcile/moneyUtils";
 
@@ -97,13 +99,15 @@ function TransactionTable({ rows }: { rows: MatchResult["left"] }) {
         </thead>
         <tbody className="divide-y divide-gray-100">
           {rows.map((tx) => (
-            <tr key={tx.id}>
+            <TableRowTooltip key={tx.id} content={tx.description || "—"}>
               <td className="px-2 py-1 font-mono">{tx.date || "—"}</td>
-              <td className="px-2 py-1 truncate max-w-[180px]">{tx.description || "—"}</td>
+              <td className="px-2 py-1">
+                <TruncatedText text={tx.description} className="max-w-[180px]" />
+              </td>
               <td className="px-2 py-1 text-right">
                 <AmountBadge cents={tx.amountCents} />
               </td>
-            </tr>
+            </TableRowTooltip>
           ))}
         </tbody>
       </table>

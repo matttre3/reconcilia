@@ -6,8 +6,8 @@ import { MatchResultsTable } from "./MatchResultsTable";
 import { AmbiguousMatchResolver } from "./AmbiguousMatchResolver";
 import { UnmatchedTransactionsTable } from "./UnmatchedTransactionsTable";
 import { MatchDetailDrawer } from "./MatchDetailDrawer";
+import { AmountBadge } from "@/components/shared/AmountBadge";
 import type { MatchResult, ReconciliationResult, ReconciliationStats } from "@/types";
-import { centsToEuro } from "@/lib/reconcile/moneyUtils";
 
 type Props = {
   matches: MatchResult[];
@@ -52,20 +52,20 @@ export function ReconciliationDashboard({
       {/* Sommario importi */}
       <div className="rounded-lg border border-gray-200 bg-white p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
         <div>
-          <p className="text-xs text-gray-500">Totale Danea</p>
-          <p className="font-mono font-semibold">{centsToEuro(Math.abs(stats.totalLeftCents))}</p>
+          <p className="text-xs text-gray-500">Saldo rilevato Danea</p>
+          <AmountBadge cents={stats.totalLeftCents} className="text-xl font-semibold" />
         </div>
         <div>
-          <p className="text-xs text-gray-500">Totale Banca</p>
-          <p className="font-mono font-semibold">{centsToEuro(Math.abs(stats.totalRightCents))}</p>
+          <p className="text-xs text-gray-500">Saldo rilevato Banca</p>
+          <AmountBadge cents={stats.totalRightCents} className="text-xl font-semibold" />
         </div>
         <div>
-          <p className="text-xs text-gray-500">Riconciliato Danea</p>
-          <p className="font-mono font-semibold text-emerald-700">{centsToEuro(Math.abs(stats.matchedLeftCents))}</p>
+          <p className="text-xs text-gray-500">Saldo riconciliato Danea</p>
+          <AmountBadge cents={stats.matchedLeftCents} className="text-xl font-semibold" />
         </div>
         <div>
-          <p className="text-xs text-gray-500">Riconciliato Banca</p>
-          <p className="font-mono font-semibold text-emerald-700">{centsToEuro(Math.abs(stats.matchedRightCents))}</p>
+          <p className="text-xs text-gray-500">Saldo riconciliato Banca</p>
+          <AmountBadge cents={stats.matchedRightCents} className="text-xl font-semibold" />
         </div>
       </div>
 

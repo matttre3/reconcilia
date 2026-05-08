@@ -1,5 +1,7 @@
 import type { Transaction } from "@/types";
 import { AmountBadge } from "@/components/shared/AmountBadge";
+import { TableRowTooltip } from "@/components/shared/TableRowTooltip";
+import { TruncatedText } from "@/components/shared/TruncatedText";
 import { Badge } from "@/components/ui/badge";
 
 type Props = {
@@ -30,9 +32,15 @@ export function UnmatchedTransactionsTable({ transactions, source }: Props) {
         </thead>
         <tbody className="divide-y divide-gray-100">
           {transactions.map((tx) => (
-            <tr key={tx.id} className="hover:bg-gray-50">
+            <TableRowTooltip
+              key={tx.id}
+              className="hover:bg-gray-50"
+              content={tx.description || "—"}
+            >
               <td className="px-3 py-2 font-mono text-xs">{tx.date || "—"}</td>
-              <td className="px-3 py-2 truncate max-w-[250px]">{tx.description || "—"}</td>
+              <td className="px-3 py-2">
+                <TruncatedText text={tx.description} className="max-w-[250px]" />
+              </td>
               <td className="px-3 py-2"><AmountBadge cents={tx.amountCents} /></td>
               <td className="px-3 py-2">
                 <Badge variant="outline" className={tx.direction === "in" ? "text-emerald-700 border-emerald-300" : "text-red-600 border-red-300"}>
@@ -40,7 +48,7 @@ export function UnmatchedTransactionsTable({ transactions, source }: Props) {
                 </Badge>
               </td>
               <td className="px-3 py-2 text-xs text-gray-400">{tx.reference || "—"}</td>
-            </tr>
+            </TableRowTooltip>
           ))}
         </tbody>
       </table>

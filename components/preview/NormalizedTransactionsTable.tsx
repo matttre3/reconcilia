@@ -12,8 +12,11 @@ import {
 import { useState } from "react";
 import type { Transaction } from "@/types";
 import { AmountBadge } from "@/components/shared/AmountBadge";
+import { TableRowTooltip } from "@/components/shared/TableRowTooltip";
+import { TruncatedText } from "@/components/shared/TruncatedText";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { sumCents } from "@/lib/reconcile/moneyUtils";
 
 type Props = {
   transactions: Transaction[];
@@ -40,7 +43,10 @@ const columns: ColumnDef<Transaction>[] = [
     accessorKey: "description",
     header: "Descrizione",
     cell: (info) => (
-      <span className="text-sm truncate max-w-[300px] block">{String(info.getValue() ?? "—")}</span>
+      <TruncatedText
+        text={String(info.getValue() ?? "—")}
+        className="max-w-[300px] text-sm"
+      />
     ),
   },
   {
@@ -88,6 +94,9 @@ export function NormalizedTransactionsTable({ transactions }: Props) {
   });
 
   const visibleRowsCount = table.getFilteredRowModel().rows.length;
+  const visibleTransactions = table.getFilteredRowModel().rows.map((row) => row.original);
+  const visibleTotalCents = sumCents(visibleTransactions.map((tx) => tx.amountCents));
+  const totalLabel = globalFilter.trim() === "" ? "Totale" : "Totale filtrato";
 
   return (
     <div className="flex flex-col gap-3">
@@ -123,13 +132,17 @@ export function NormalizedTransactionsTable({ transactions }: Props) {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {table.getRowModel().rows.slice(0, 200).map((row) => (
-              <tr key={row.id} className="hover:bg-gray-50">
+              <TableRowTooltip
+                key={row.id}
+                className="hover:bg-gray-50"
+                content={row.original.description || "—"}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-3 py-2">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
-              </tr>
+              </TableRowTooltip>
             ))}
             {table.getFilteredRowModel().rows.length > 200 && (
               <tr>
@@ -139,6 +152,20 @@ export function NormalizedTransactionsTable({ transactions }: Props) {
               </tr>
             )}
           </tbody>
+          <tfoot className="border-t border-gray-200 bg-gray-50">
+            <tr>
+              <td colSpan={3} className="px-3 py-2 text-right text-sm font-semibold text-gray-700">
+                {totalLabel}
+              </td>
+              <td className="px-3 py-2">
+                <AmountBadge cents={visibleTotalCents} />
+              </td>
+              <td className="px-3 py-2 text-xs text-gray-500">
+                {visibleRowsCount} mov.
+              </td>
+              <td className="px-3 py-2" />
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>

@@ -6,7 +6,10 @@ import type {
 } from "@/types";
 import { matchExact } from "./matchExact";
 import { matchGrouped } from "./matchGrouped";
-import { sumCents } from "./moneyUtils";
+import {
+  getResolvedMatches,
+  sumTransactionCents,
+} from "./statsUtils";
 
 export function reconcile(input: ReconciliationInput): ReconciliationResult {
   const { left, right, config } = input;
@@ -108,9 +111,10 @@ function computeStats(
   const exactMatches = matches.filter((m) => m.status === "exact");
   const groupedMatches = matches.filter((m) => m.status === "grouped");
   const ambiguousMatches = matches.filter((m) => m.status === "ambiguous");
+  const matchedMatches = getResolvedMatches(matches);
 
-  const matchedLeft = matches.flatMap((m) => m.left);
-  const matchedRight = matches.flatMap((m) => m.right);
+  const matchedLeft = matchedMatches.flatMap((m) => m.left);
+  const matchedRight = matchedMatches.flatMap((m) => m.right);
 
   return {
     totalLeft: left.length,
@@ -120,9 +124,9 @@ function computeStats(
     ambiguous: ambiguousMatches.length,
     unmatchedLeft: unmatchedLeft.length,
     unmatchedRight: unmatchedRight.length,
-    totalLeftCents: sumCents(left.map((tx) => tx.amountCents)),
-    totalRightCents: sumCents(right.map((tx) => tx.amountCents)),
-    matchedLeftCents: sumCents(matchedLeft.map((tx) => tx.amountCents)),
-    matchedRightCents: sumCents(matchedRight.map((tx) => tx.amountCents)),
+    totalLeftCents: sumTransactionCents(left),
+    totalRightCents: sumTransactionCents(right),
+    matchedLeftCents: sumTransactionCents(matchedLeft),
+    matchedRightCents: sumTransactionCents(matchedRight),
   };
 }
